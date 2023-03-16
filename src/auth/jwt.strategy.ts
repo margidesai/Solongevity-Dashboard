@@ -1,31 +1,29 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Model } from 'mongoose';
-import { Strategy, ExtractJwt } from 'passport-jwt';
-import { User } from './schemas/user.schema';
+import { ExtractJwt, VerifiedCallback } from 'passport-jwt';
+import { Strategy } from 'passport-jwt';
+
+import { JwtConstants } from './auth.constants';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    @InjectModel(User.name)
-    private userModel: Model<User>,
-  ) {
+  constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: JwtConstants.secret,
     });
   }
 
-  async validate(payload) {
-    const { id } = payload;
-
-    const user = await this.userModel.findById(id);
-
-    if (!user) {
-      throw new UnauthorizedException('Login first to access this endpoint.');
+  async validate(payload: any, done: VerifiedCallback) {
+    const admin = await this.authService.validateAdmin(payload);
+    if (!admin) {
+      return done(
+        new HttpException('Unauthorized access', HttpStatus.UNAUTHORIZED),
+        false,
+      );
     }
 
-    return user;
+    return done(null, admin, payload.iat);
   }
 }
