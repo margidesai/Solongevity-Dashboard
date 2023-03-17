@@ -11,7 +11,7 @@ import * as bcrypt from 'bcrypt';
 export class AdminPasswordService {
   constructor(
     @InjectModel(User.name) private readonly adminModel: Model<UserDocument>,
-    private readonly mailer: EmailHelper,
+    private readonly mailer: EmailHelper
   ) {}
 
   async forgotPassword(AdminForgotPasswordDto: adminForgotPasswordDto) {
@@ -64,9 +64,12 @@ export class AdminPasswordService {
 
     try {
       
+      const saltOrRounds = 10;
+      const password = AdminResetPasswordDto.new_password;
+      const passwordHash = await bcrypt.hash(password, saltOrRounds);
       await this.adminModel.findByIdAndUpdate(
         { _id: Admin._id },
-        { password:AdminResetPasswordDto.new_password, passwordToken: '' },
+        { password:passwordHash,   passwordToken: '' },
       );
 
        return "Password Reset successfully.";
