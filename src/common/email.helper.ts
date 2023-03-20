@@ -60,13 +60,13 @@ export class EmailHelper {
           secureConnection: false, // use SSL
           port: 587,
           auth: {
-            user: 'margi.desai@agileinfoways.com',
-            pass: 'JayAmbe@121198',
+            user: '',
+            pass: '',
           },
         }),
       );
       const mailOption: Mail.Options = {
-        from: 'margi.desai@agileinfoways.com',
+        from: '',
         to: email,
         subject,
         html: mailbody,
