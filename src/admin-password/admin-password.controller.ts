@@ -14,7 +14,7 @@ export class AdminPasswordController {
   constructor(private readonly adminPasswordService: AdminPasswordService) {}
 
   
-  @Post('forgoPassword')
+  @Post('forgotPassword')
   async ForgotPassword(@Body() AdminForgotPasswordDto: adminForgotPasswordDto) {
     console.log("hete");
     return await this.adminPasswordService.forgotPassword(

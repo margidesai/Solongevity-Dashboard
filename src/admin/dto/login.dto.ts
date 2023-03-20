@@ -19,10 +19,3 @@ export class LoginDto {
   readonly userType:string
 }
 
-export class ForgotPasswordDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEmail()
-  @IsString()
-  email: string;
-}

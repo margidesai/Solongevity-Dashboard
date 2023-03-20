@@ -61,7 +61,7 @@ export class EmailHelper {
           port: 587,
           auth: {
             user: 'margi.desai@agileinfoways.com',
-            pass: 'Desaimargi@121198',
+            pass: 'JayAmbe@121198',
           },
         }),
       );
