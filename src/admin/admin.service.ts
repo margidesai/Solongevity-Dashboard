@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -11,6 +12,7 @@ import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import {
   changePasswordDto,
+  editProfileDto,
   verficationCodeSendDto,
 } from './dto/editProfile.dto';
 import { EmailHelper } from 'src/common/email.helper';
@@ -31,11 +33,14 @@ export class AdminService {
 
     const user = await this.userModel.findOne({ email, userType });
     if (!user) {
+      Logger.error('User does not exists' + user);
       throw new NotFoundException('User does not exists');
     }
     if (await bcrypt.compare(password, user.password)) {
+      Logger.log('Login successfull' + user);
       return user;
     } else {
+      Logger.error('Password not match');
       throw new BadRequestException('invalid credential');
     }
   }
@@ -53,8 +58,10 @@ export class AdminService {
     console.log('auth headers service is:::::::::::::::::', authHeaders);
     let admin = await this.userModel.find({});
     if (!admin) {
+      Logger.error('User does not exists' + admin);
       throw new NotFoundException('Admin does not exists');
     } else {
+      Logger.log('Get admin details' + admin[0]);
       return admin[0];
     }
   }
@@ -94,11 +101,17 @@ export class AdminService {
           { email: admin[0].email },
           { passwordToken: token },
         );
-        return 'Verification code sent your mail id.';
+        Logger.log('Verification code sent your mail id.');
+        return {
+          status:200,
+          message:'Verification code sent your mail id.'
+        };
       } catch (e) {
+        Logger.error('Oops! Something went wrong.'+e);
         throw new NotFoundException('Oops! Something went wrong.');
       }
     } else {
+      Logger.error('Password not match.');
       throw new BadRequestException('Password not match.');
     }
   }
@@ -107,15 +120,9 @@ export class AdminService {
     changePasswordDto: changePasswordDto,
     authHeaders: string,
   ) {
-    let admin = await this.userModel.find({});
-    console.log(
-      'change password token is::::::::::::::::::::::::::::::::',
-      changePasswordDto.token,
-    );
     let checkToken = await this.userModel.findOne({
       passwordToken: changePasswordDto.token,
     });
-    console.log('check token is:::::', checkToken);
     if (checkToken) {
       try {
         const saltOrRounds = 10;
@@ -125,13 +132,43 @@ export class AdminService {
           { _id: checkToken._id },
           { password: passwordHash, passwordToken: '' },
         );
-
-        return 'Password change successfully.';
+        Logger.log('Password change successfully.');
+        return {
+          status:200,
+          message:'Password change successfully.'
+        };
       } catch (e) {
+        Logger.error('Oops! Something went wrong.'+e);
         throw new NotFoundException('Oops! Something went wrong.');
       }
     } else {
+      Logger.error('No token found.');
       throw new NotFoundException('No token found.');
+    }
+  }
+
+  async editProfile(editProfileDto: editProfileDto, authHeaders: string) {
+    let admin = await this.userModel.find({});
+    if (!admin) {
+      Logger.error('Admin does not exists'+admin);
+      throw new NotFoundException('Admin does not exists');
+    } else {
+      let updateAdmin = await this.userModel.findOneAndUpdate({
+        firstName: editProfileDto.firstName,
+        lastName: editProfileDto.lastName,
+        email: editProfileDto.email,
+        country: editProfileDto.country,
+      });
+      if (updateAdmin) {
+        Logger.log('Update admin details successfully.');
+        return {
+          status:200,
+          message:'Update admin details successfully.'
+        };
+      } else {
+        Logger.error('Oops! Something went wrong.');
+        throw new NotFoundException('Oops! Something went wrong.');
+      }
     }
   }
 }

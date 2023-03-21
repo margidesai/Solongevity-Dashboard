@@ -4,7 +4,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtDecode } from 'src/util/AuthUtil';
-import { changePasswordDto, verficationCodeSendDto } from './dto/editProfile.dto';
+import { changePasswordDto, editProfileDto, verficationCodeSendDto } from './dto/editProfile.dto';
 @ApiBearerAuth()
 @Controller('admin')
 @ApiTags('Admin Details')
@@ -36,9 +36,17 @@ export class AdminController {
   }
 
   @Post('changePassword')
-  async changePassword( @Body() changePasswordDto:changePasswordDto,@Request() req: Request,){
+  async changePassword( @Body() changePasswordDto:changePasswordDto,@Request() req: Request){
     const decoded = JwtDecode.getDecodedJwt(req.headers['authorization']);
     const adminPassword = await this.adminService.changePassword(changePasswordDto,req.headers['authorization'])
     return adminPassword;
   }
+
+  @Post('editProfile')
+  async editProfile(@Body() editProfileDto:editProfileDto,@Request() req:Request){
+    const editProfileUser = await this.adminService.editProfile(editProfileDto,req.headers['authorization'])
+    return editProfileUser;
+  }
+
+
 }
