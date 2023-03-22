@@ -10,20 +10,21 @@ export class SuperAdminAuthMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      const decoded = JwtDecode.getDecodedJwt(req.headers.authorization);
-      console.log('decoded::::::::::::::::', decoded);
+      console.log("req headers is::::::::::::::::::::::::",JSON.parse(JSON.stringify(req.headers)));
+      const decoded = JwtDecode.getDecodedJwt(req.headers['authorization']);
+      // console.log('decoded::::::::::::::::', decoded);
       if (decoded) {
-        console.log('if cond');
+        // console.log('if cond');
         next();
       } else {
         throw new NotFoundException('Unauthorized user');
       }
     } catch (error) {
       console.log('SuperAdminAuthMiddleware -> use -> error', error);
-      console.log(
-        'SuperAdminAuthMiddleware -> use -> error.response',
-        error.response,
-      );
+      // console.log(
+      //   'SuperAdminAuthMiddleware -> use -> error.response',
+      //   error.response,
+      // );
       if (error.response.statusCode) {
         throw new NotFoundException(error.response.message);
       }

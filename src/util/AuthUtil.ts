@@ -6,11 +6,12 @@ import {
   } from '@nestjs/common';
 export const JwtDecode = {
 
-    getDecodedJwt(authHeaders: String): any {
+    getDecodedJwt(accessToken: String): any {
+        console.log('auth utils headers is:::::::::::::::::::::::::::::::::',accessToken);
         try {
-           console.log('auth headers is:::::::::::::::::::::::::::::::::',authHeaders);
-            if (authHeaders && (authHeaders as string).split(' ')[1]) {
-                const token = (authHeaders as string).split(' ')[1];
+           
+            if (accessToken && (accessToken as string).split(' ')[1]) {
+                const token = (accessToken as string).split(' ')[1];
                 const decoded: any = jwt.verify(token, JwtConstants.secret);
                 return decoded;
 

@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule,MiddlewareConsumer } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Admin, AdminSchema } from 'schemas/admin.schema';
 import { Login, LoginSchema } from 'schemas/login.schema';
 import { EmailHelper } from 'src/common/email.helper';
-import { AdminLoginController } from './admin.controller';
+import { SuperAdminAuthMiddleware } from 'src/middleware/auth.middleware';
+import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 
 @Module({
@@ -11,7 +12,14 @@ import { AdminService } from './admin.service';
     MongooseModule.forFeature([{name:Login.name,schema:LoginSchema},{name:Admin.name,schema:AdminSchema}]),
   ],
   providers: [AdminService,EmailHelper],
-  controllers: [AdminLoginController],
+  controllers: [AdminController],
   exports: [AdminService],
 })
-export class AdminModule {}
+export class AdminModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+
+    consumer
+      .apply(SuperAdminAuthMiddleware)
+      .forRoutes(AdminController);
+  } 
+}

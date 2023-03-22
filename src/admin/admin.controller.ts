@@ -12,11 +12,12 @@ import { AdminService } from './admin.service';
 
 @ApiTags('admin Profile')
 @Controller('admin-login')
-export class AdminLoginController {
+export class AdminController {
   constructor(private adminService: AdminService) {}
 
   @Get('getAdminProfile')
   async getAdminDetails(@Request() req: Request) {
+    console.log("req.header is controller file",req.headers);
     const admin = await this.adminService.getAdminDetails(
       req.headers['authorization'],
     );

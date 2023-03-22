@@ -12,4 +12,8 @@ export const TypeExceptions = {
     InvalidFile(): any {
         return new HttpException({ message: "Uploaded file is invalid", error: 'InvalidFile', statusCode: HttpStatus.BAD_REQUEST }, HttpStatus.BAD_REQUEST);
     },
+
+    EmailAlreadyExists(): any {
+        return new HttpException({ message: "Email already exists", error: 'EmailAlreadyExists', statusCode: HttpStatus.CONFLICT }, HttpStatus.CONFLICT);
+    },
 }

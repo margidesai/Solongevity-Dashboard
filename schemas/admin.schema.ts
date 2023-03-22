@@ -5,8 +5,6 @@ export type AdminDocument = Admin & Document;
 
 @Schema({ collection: 'tbl_admin',timestamps: true })
 export class Admin {
-  _id:ObjectId
-
   @Prop()
   firstName: string;
 

@@ -62,9 +62,10 @@ export class AdminService {
   }
 
   async getAdminDetails(authHeaders: string) {
+    console.log("get admin is:::::::::::::::::::::::",authHeaders);
     const admin = await this.loginModel.find({});
     if (!admin) {
-      throw new NotFoundException('Admin does not exists');
+      throw AuthExceptions.AccountNotexist();
     } else {
       let getAdminDetails = await this.adminModel.findOne({
         loginId: admin[0]._id,
@@ -163,8 +164,7 @@ export class AdminService {
     let admin = await this.loginModel.find({});
     console.log("edit admin is::::::::::::::::::::",admin);
     if (!admin) {
-      Logger.error('Admin does not exists'+admin);
-      throw new NotFoundException('Admin does not exists');
+      throw AuthExceptions.AccountNotexist();
     } else {
       let updateAdmin = await this.adminModel.findOneAndUpdate({
         firstName: editProfileDto.firstName,
