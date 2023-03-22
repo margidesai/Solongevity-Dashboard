@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule,ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
+import { AdminLoginController } from './admin/admin.controller';
+import { AdminModule } from './admin/admin.module';
 
 import 'dotenv/config';
+import { AdminPasswordModule } from './admin-password/admin-password.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -14,8 +17,10 @@ import 'dotenv/config';
       inject: [],
     }),
     AuthModule,
+    AdminModule,
+    AdminPasswordModule
   ],
-  controllers: [],
+  controllers: [AdminLoginController],
   providers: [],
 })
 export class AppModule {}

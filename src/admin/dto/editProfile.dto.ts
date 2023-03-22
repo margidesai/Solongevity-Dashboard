@@ -32,11 +32,6 @@ export class editProfileDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsEmail({}, { message: 'Please enter correct email' })
-  readonly email: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
   @IsString()
   readonly country:string
 }

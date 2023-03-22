@@ -1,12 +1,17 @@
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-// import { AdminService } from 'src/admin/admin.service';
-import { AdminModule } from 'src/admin/admin.module'; 
+
 import { JwtStrategy } from './jwt.strategy';
 import { Module } from '@nestjs/common';
+import { AdminModule } from 'src/admin/admin.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { LoginSchema } from 'schemas/login.schema';
 
 @Module({
-  imports: [AdminModule],
+  imports:[
+    AdminModule,
+    MongooseModule.forFeature([{name:'Login',schema:LoginSchema}]),
+  ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
 })

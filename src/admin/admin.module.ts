@@ -1,27 +1,17 @@
-import { Module,NestModule,MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-
-import { UserSchema } from 'schemas/user.schema';
-import { AdminPasswordModule } from 'src/admin-password/admin-password.module';
-import { AdminService } from './admin.service';
-import { AdminController } from './admin.controller';
-import { SuperAdminAuthMiddleware } from 'src/middleware/auth.middleware';
+import { Admin, AdminSchema } from 'schemas/admin.schema';
+import { Login, LoginSchema } from 'schemas/login.schema';
 import { EmailHelper } from 'src/common/email.helper';
+import { AdminLoginController } from './admin.controller';
+import { AdminService } from './admin.service';
 
 @Module({
   imports:[
-    MongooseModule.forFeature([{name:'User',schema:UserSchema}]),
-    AdminPasswordModule
+    MongooseModule.forFeature([{name:Login.name,schema:LoginSchema},{name:Admin.name,schema:AdminSchema}]),
   ],
   providers: [AdminService,EmailHelper],
-  controllers: [AdminController],
+  controllers: [AdminLoginController],
   exports: [AdminService],
 })
-export class AdminModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-
-    consumer
-      .apply(SuperAdminAuthMiddleware)
-      .forRoutes(AdminController);
-  } 
-}
+export class AdminModule {}
