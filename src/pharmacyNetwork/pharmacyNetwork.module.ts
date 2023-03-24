@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MulterModule } from '@nestjs/platform-express';
 import { Login, LoginSchema } from 'schemas/login.schema';
 import { EmailHelper } from 'src/common/email.helper';
 import { PharmacyNetworkController } from './pharmacyNetwork.controller';
@@ -14,6 +15,9 @@ import { ProductPlan, ProductPlanSchema } from './schemas/productPlan.schema';
       { name: PharmacyNetwork.name, schema: PharmacyNetworkSchema },
       { name: Login.name, schema: LoginSchema },
     ]),
+    MulterModule.register({
+      dest:'./uploads/contractFile'
+    })
   ],
   providers: [PharmacyNetworkService,EmailHelper],
   controllers: [PharmacyNetworkController],

@@ -15,11 +15,13 @@ import { AdminService } from './admin.service';
   controllers: [AdminController],
   exports: [AdminService],
 })
-export class AdminModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
+export class AdminModule {}
 
-    consumer
-      .apply(SuperAdminAuthMiddleware)
-      .forRoutes(AdminController);
-  } 
-}
+// implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+
+//     consumer
+//       .apply(SuperAdminAuthMiddleware)
+//       .forRoutes(AdminController);
+//   } 
+// }

@@ -27,6 +27,12 @@ export class ProductPlan {
   freePlan: string;
 
   @Prop()
+  isShown: Boolean;
+
+  @Prop({default:true})
+  isActive: Boolean;
+
+  @Prop()
   createdAt: Date;
 
   @Prop()

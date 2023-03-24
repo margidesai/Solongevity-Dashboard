@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsNotEmpty, IsEmail, IsArray } from 'class-validator';
+import { IsNumber, IsString, IsNotEmpty, IsEmail, IsArray, IsBoolean, IsOptional } from 'class-validator';
 export class pharmacyNetworkDto {
   @ApiProperty()
   @IsString()
@@ -62,8 +62,24 @@ export class pharmacyNetworkDto {
   galaxy: string;
 
   @ApiProperty()
-  @IsArray()
+  // @IsArray()
   @IsNotEmpty()
-  productPlanId:String
+  productPlan:[string]
+
+  @ApiProperty()
+  contractFile:string
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+    paymentMode: string;
+
+  @ApiProperty()
+  @IsOptional()
+  hqClient:string;
+
+  @ApiProperty()
+  @IsOptional()
+  agentClient:string;
 
 }

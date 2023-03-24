@@ -10,6 +10,7 @@ import {
 } from './dto/editProfile.dto';
 import { AdminService } from './admin.service';
 
+@ApiBearerAuth()
 @ApiTags('admin Profile')
 @Controller('admin-login')
 export class AdminController {

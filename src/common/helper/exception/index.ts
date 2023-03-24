@@ -8,4 +8,15 @@ export const CustomError = {
     UnknownError(message): any {
         return new HttpException({ message: message || "Something went wrong, please try again later!", error: 'UnknownError', statusCode: HttpStatus.BAD_GATEWAY }, HttpStatus.BAD_GATEWAY);
     },
+
+    NotFound(message): any {
+        return new HttpException(
+          {
+            statusCode: HttpStatus.NOT_FOUND,
+            message: message,
+            data: {},
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      },
 }

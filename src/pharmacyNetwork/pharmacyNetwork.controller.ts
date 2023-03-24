@@ -1,7 +1,24 @@
-import { Controller, Get,Post,Request,Body } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Request,
+  Body,
+  UseInterceptors,
+  UploadedFile,
+  Param,
+} from '@nestjs/common';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+  FilesInterceptor,
+} from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { customProductPlanDto } from './dto/customProductPlanDto.dto';
 import { pharmacyNetworkDto } from './dto/pharmacyNetwork.dto';
 import { PharmacyNetworkService } from './pharmacyNetwork.service';
+import { diskStorage } from 'multer';
+import { updatePharmacyNetworkDto } from './dto/updatePharmacyNetwork.dto';
 
 @Controller('pharmacy-network')
 @ApiTags('PharmacyNetwok')
@@ -9,9 +26,81 @@ export class PharmacyNetworkController {
   constructor(private pharmacynetworkService: PharmacyNetworkService) {}
 
   @Post('addPharmacyNetwork')
-  async addPharmacyNetwork(@Body() params: pharmacyNetworkDto){
-    const addPharamacyNetwork = await this.pharmacynetworkService.addPharamacyNetwork(params)
-    return addPharamacyNetwork
+  @UseInterceptors(
+    FileInterceptor('contractFile', { dest: './uploads/contractFile/' }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Create Pharmacy Netwok',
+    schema: {
+      type: 'object',
+      properties: {
+        userType: {
+          type: 'string',
+        },
+        name: {
+          type: 'string',
+        },
+        personName: {
+          type: 'string',
+        },
+        address: {
+          type: 'string',
+        },
+        town: {
+          type: 'string',
+        },
+        postalCode: {
+          type: 'string',
+        },
+        country: {
+          type: 'string',
+        },
+        email: {
+          type: 'string',
+        },
+        phoneNumber: {
+          type: 'string',
+        },
+        personOfReference: {
+          type: 'string',
+        },
+        vat: {
+          type: 'string',
+        },
+        galaxy: {
+          type: 'string',
+        },
+        productPlan: {
+          type: 'string',
+        },
+        contractFile: {
+          type: 'string',
+          format: 'binary',
+        },
+        paymentMode: {
+          type: 'string',
+        },
+        hqClient: {
+          type: 'string',
+        },
+        agentClient: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  async addPharmacyNetwork(
+    @UploadedFile() contractFile: Express.Multer.File,
+    @Body() pharmacyNetworkDto: pharmacyNetworkDto,
+  ) {
+    if (contractFile) {
+      pharmacyNetworkDto.contractFile = contractFile.originalname;
+    }
+
+    const addPharamacyNetwork =
+      await this.pharmacynetworkService.addPharamacyNetwork(pharmacyNetworkDto);
+    return addPharamacyNetwork;
   }
 
   @Get('getProductPlanDetails')
@@ -22,5 +111,67 @@ export class PharmacyNetworkController {
     return getProductPlan;
   }
 
+  @Post('addCustomProductPlan')
+  async addCustomProductPlan(@Body() params: customProductPlanDto) {
+    console.log('params is:::::::::::::::', params);
+    const addCustomProductPlan =
+      await this.pharmacynetworkService.addCustomProductPlan(params);
+    return addCustomProductPlan;
+  }
+
+  @Post('getAllPharmacyNetwork')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        page: {
+          type: 'number',
+        },
+        limit: {
+          type: 'number',
+        },
+        search: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  async getAllPharmacyNetwork(@Body() body: any): Promise<any> {
+    return this.pharmacynetworkService.getAllPharmacyNetwork(body);
+  }
+
+  @Post('/activeInactivePharmacyNetwork')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        pharmacyNetwork_Id: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  async activeInactive(@Body() body: any) {
+    const getPharmacyNetwork = await this.pharmacynetworkService.getPharmacyNetworkDetails(
+      body.pharmacyNetwork_Id,
+    );
+    console.log("getPharmacyNetwork::::::::::::::::",getPharmacyNetwork);
+    if (getPharmacyNetwork) {
+      return this.pharmacynetworkService.activeInactivePharmacyNetwork(
+        body.pharmacyNetwork_Id,
+        getPharmacyNetwork,
+      );
+    }
+  }
+
+  @Post('updatePharmacyNetwork/:id')
+  async updateSubAdmin(
+    @Param('id') id: string,
+    @Body() body: updatePharmacyNetworkDto,
+  ) {
+    return this.pharmacynetworkService.updatePharmacyNetwork(id, body);
+  }
+
   
+
 }

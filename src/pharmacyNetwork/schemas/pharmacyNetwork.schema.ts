@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 
 export type PharmacyNetworkDocument = PharmacyNetwork & Document;
 
@@ -10,6 +11,9 @@ export class PharmacyNetwork {
 
   @Prop()
   personName: string;
+
+  @Prop()
+  loginId:mongoose.Schema.Types.ObjectId;
 
   @Prop()
   address: string;
@@ -36,7 +40,31 @@ export class PharmacyNetwork {
   galaxy: string;
 
   @Prop({ type: Array })
-  productPlanId: string;
+  productPlan: string;
+
+  @Prop()
+  total: number;
+
+  @Prop()
+  finalAmount: number;
+
+  @Prop()
+  contractFile:string
+
+  @Prop()
+  paymentMode: string;
+
+  @Prop()
+  hqClient: string;
+
+  @Prop()
+  agentClient: string;
+
+  @Prop({default:true})
+  isActive: boolean;
+
+  @Prop({default:false})
+  isDeleted: boolean;
 
   @Prop()
   createdAt: Date;
