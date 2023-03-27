@@ -20,6 +20,7 @@ import { PharmacyNetworkService } from './pharmacyNetwork.service';
 import { diskStorage } from 'multer';
 import { updatePharmacyNetworkDto } from './dto/updatePharmacyNetwork.dto';
 import { CustomError } from 'src/common/helper/exception';
+import { deletePharmacyNetworkDto } from './dto/deletePharmacyNetwork.dto';
 
 @Controller('pharmacy-network')
 @ApiTags('PharmacyNetwok')
@@ -27,10 +28,10 @@ export class PharmacyNetworkController {
   constructor(private pharmacynetworkService: PharmacyNetworkService) {}
 
   @Post('addPharmacyNetwork')
-  @UseInterceptors(
-    FileInterceptor('contractFile', { dest: './uploads/contractFile/' }),
-  )
-  @ApiConsumes('multipart/form-data')
+  // @UseInterceptors(
+  //   FileInterceptor('contractFile', { dest: './uploads/contractFile/' }),
+  // )
+  // @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Create Pharmacy Netwok',
     schema: {
@@ -75,10 +76,10 @@ export class PharmacyNetworkController {
         productPlan: {
           type: 'string',
         },
-        contractFile: {
-          type: 'string',
-          format: 'binary',
-        },
+        // contractFile: {
+        //   type: 'string',
+        //   format: 'binary',
+        // },
         paymentMode: {
           type: 'string',
         },
@@ -92,13 +93,13 @@ export class PharmacyNetworkController {
     },
   })
   async addPharmacyNetwork(
-    @UploadedFile() contractFile: Express.Multer.File,
+    // @UploadedFile() contractFile: Express.Multer.File,
     @Body() pharmacyNetworkDto: pharmacyNetworkDto,
   ) {
-    if (contractFile) {
-      pharmacyNetworkDto.contractFile = contractFile.originalname;
-    }
-
+    // if (contractFile) {
+    //   pharmacyNetworkDto.contractFile = contractFile.originalname;
+    // }
+    console.log("pharmacyNetworkDto:::::::::::::::::::::::",pharmacyNetworkDto);
     const addPharamacyNetwork =
       await this.pharmacynetworkService.addPharamacyNetwork(pharmacyNetworkDto);
     return addPharamacyNetwork;
@@ -134,6 +135,15 @@ export class PharmacyNetworkController {
         search: {
           type: 'string',
         },
+        dateRange:{
+          type:'string'
+        },
+        startDate:{
+          type:'string'
+        },
+        endDate:{
+          type:'string'
+        }
       },
     },
   })
@@ -161,14 +171,38 @@ export class PharmacyNetworkController {
     return this.pharmacynetworkService.updatePharmacyNetwork(body);
   }
 
-  @Get('getPharmacyNetworkDetails/:id')
-  async getPharmacyNetworkDetails(@Param('id') id: string) {
+  @Post('getPharmacyNetworkDetails')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        pharmacyNetworkId: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  async getPharmacyNetworkDetails(@Body() body: string) {
     const getPharmacyNetwork =
-      await this.pharmacynetworkService.getPharmacyNetworkDetails(id);
-    if (!getPharmacyNetwork) {
-      throw CustomError.NotFound('Pharmacy network not found');
-    } else {
-      return getPharmacyNetwork;
-    }
+      await this.pharmacynetworkService.getPharmacyNetworkDetails(body);
+    return getPharmacyNetwork
+  }
+
+  @Post('deletePharmacyNetwork')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       pharmacyNetworkId: {
+  //         type: 'string',
+  //       },
+  //     },
+  //   },
+  // })
+  async deletePharmacyNetwork(@Body() body: deletePharmacyNetworkDto) {
+    console.log("body is::::::::::::::",body);
+    const getPharmacyNetwork =
+      await this.pharmacynetworkService.deletePharmacyNetwork(body);
+    return getPharmacyNetwork
   }
 }

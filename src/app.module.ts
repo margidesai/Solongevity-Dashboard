@@ -10,6 +10,7 @@ import { AdminPasswordModule } from './admin-password/admin-password.module';
 import { PharmacyNetworkController } from './pharmacyNetwork/pharmacyNetwork.controller';
 import { PharmacyNetworkModule } from './pharmacyNetwork/pharmacyNetwork.module';
 import { CredentialModule } from './common/credential/credential.module';
+import { FileUploadModule } from './common/file-upload/file-upload.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -23,7 +24,8 @@ import { CredentialModule } from './common/credential/credential.module';
     AdminModule,
     AdminPasswordModule,
     PharmacyNetworkModule,
-    CredentialModule
+    CredentialModule,
+    FileUploadModule
   ],
   controllers: [AdminController, PharmacyNetworkController],
   providers: [],

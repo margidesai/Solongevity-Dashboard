@@ -66,8 +66,8 @@ export class pharmacyNetworkDto {
   @IsNotEmpty()
   productPlan:[string]
 
-  @ApiProperty()
-  contractFile:string
+  // @ApiProperty()
+  // contractFile:string
 
   @ApiProperty()
   @IsString()

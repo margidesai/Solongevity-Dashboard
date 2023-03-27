@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Login, LoginDocument } from 'schemas/login.schema';
 import { CustomError, TypeExceptions } from 'src/common/helper/exception';
 import { AuthExceptions } from 'src/common/helper/exception/auth.exception';
@@ -15,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { EmailHelper } from 'src/common/email.helper';
 import { customProductPlanDto } from './dto/customProductPlanDto.dto';
 import { updatePharmacyNetworkDto } from './dto/updatePharmacyNetwork.dto';
+import { deletePharmacyNetworkDto } from './dto/deletePharmacyNetwork.dto';
 
 @Injectable()
 export class PharmacyNetworkService {
@@ -26,6 +27,7 @@ export class PharmacyNetworkService {
     @InjectModel(Login.name)
     private loginmodel: Model<LoginDocument>,
     private readonly mailer: EmailHelper,
+    
   ) {}
 
   async getProductPlan(authHeaders: string) {
@@ -38,8 +40,9 @@ export class PharmacyNetworkService {
 
   async addPharamacyNetwork(params) {
     try {
-      let data = JSON.parse(params.productPlan);
-      console.log('data is::::::::::::::::::::::', data);
+      
+      // let data = JSON.parse(params.productPlan);
+      // console.log("data is:::::::::::::::::::::::::",data);
       let checkEmail = await this.loginmodel.find({
         email: params.email,
       });
@@ -65,7 +68,7 @@ export class PharmacyNetworkService {
         };
         let total;
 
-        let storeProductPlan = data;
+        let storeProductPlan = params.productPlan;
         JSON.parse(JSON.stringify(storeProductPlan)).map((sp) => {
           sp.amount += sp.amount;
           total = sp.amount;
@@ -96,8 +99,6 @@ export class PharmacyNetworkService {
           let addLoginInfo = await this.loginmodel.create(loginInfo);
           if (addLoginInfo) {
             pharmacyData.loginId = addLoginInfo._id;
-            console.log('add login info is::::::::::::::::::', addLoginInfo);
-            console.log('pharamacy data is:::::::::::::::::;', pharmacyData);
             await this.pharmacyNetworkmodel.create(pharmacyData);
             await this.mailer.sendMailToAdmin(
               {
@@ -114,21 +115,6 @@ export class PharmacyNetworkService {
             );
           }
         }
-        // if (Info && pharmacyData) {
-        //   await this.loginmodel.create(Info);
-        //   await this.pharmacyNetworkmodel.create(pharmacyData);
-        //   await this.mailer.sendMailToAdmin(
-        //     {
-        //       adminName: params.name,
-        //       email: params.email,
-        //       html: mailBody,
-        //     },
-        //     'Pharmacy Network Info',
-        //   );
-        //   return { ...Info, ...pharmacyData };
-        // } else {
-        //   throw new NotFoundException('Oops! Something went wrong.');
-        // }
       }
     } catch (error) {
       if (error?.response?.error) {
@@ -163,8 +149,42 @@ export class PharmacyNetworkService {
       const limit = body.limit ? Number(body.limit) : 10;
       const page = body.page ? Number(body.page) : 1;
       const skip = (page - 1) * limit;
-      console.log('body is::::::::::::::::', body, limit, page);
+      console.log('body is::::::::::::::::', body);
+      let start_date,end_date
+      
+      if (body.dateRange == 'today') {
+        start_date = new Date(new Date().setUTCHours(0, 0, 0, 0));;
+        end_date = new Date(new Date().setUTCHours(11, 59, 59, 999)); 
+      }
+      if(body.dateRange == "thisWeek"){
+        start_date =new Date(new Date().setUTCHours(0, 0, 0, 0));
+        let day = new Date(new Date().setUTCHours(0, 0, 0, 0))
+        day.setDate(day.getDate() + 7);
+        end_date = day;
+      }
+      if(body.dateRange == "lastWeek"){
+        let day = new Date(new Date().setUTCHours(0, 0, 0, 0))
+        day.setDate(day.getDate() - 7);
+        start_date = day;
+        end_date =new Date(new Date().setUTCHours(0, 0, 0, 0));
+      }
+      if(body.dateRange == "custom"){
+        start_date = new Date(body.startDate)
+        let day = new Date(body.endDate)
+        day.setDate(day.getDate() + 1);
+        end_date = day;
+        console.log("start date and end date is:::::::::::::::",start_date,end_date);
+      }
       const aggregateQuery = [];
+
+      aggregateQuery.push({
+        $match:{
+          createdAt:{
+            $gte: start_date,
+            $lt: end_date
+          }
+        }
+      })
 
       aggregateQuery.push({
         $lookup: {
@@ -286,10 +306,106 @@ export class PharmacyNetworkService {
   }
 
   //get Pharmacy Details
-  async getPharmacyNetworkDetails(id: string): Promise<any> {
+  async getPharmacyNetworkDetails(body: any): Promise<any> {
     try {
-      const data = await this.pharmacyNetworkmodel.findOne({ _id: id });
-      return data;
+      console.log('id is::::::::::::', body);
+      const aggregateQuery = [];
+      aggregateQuery.push({
+        $match: {
+          _id: new mongoose.Types.ObjectId(body.pharmacyNetworkId),
+        },
+      });
+      aggregateQuery.push({
+        $lookup: {
+          from: 'tbl_login',
+          localField: 'loginId',
+          foreignField: '_id',
+          as: 'loginDetails',
+        },
+      });
+
+      aggregateQuery.push({
+        $unwind: {
+          path: '$loginDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      });
+      aggregateQuery.push({
+        $unwind: {
+          path: '$productPlan',
+          preserveNullAndEmptyArrays: true,
+        },
+      });
+      aggregateQuery.push({
+        $addFields: {
+          productPlanOId: {
+            $toObjectId: '$productPlan.productPlanId',
+          },
+        },
+      });
+      aggregateQuery.push({
+        $lookup: {
+          from: 'tbl_productPlan',
+          localField: 'productPlanOId',
+          foreignField: '_id',
+          as: 'productPlanDetails',
+        },
+      });
+
+      aggregateQuery.push({
+        $unwind: {
+          path: '$productPlanDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      });
+      aggregateQuery.push({
+        $group: {
+          _id: '$_id',
+          name: {
+            $first: '$name',
+          },
+          personName: {
+            $first: '$personName',
+          },
+          email: {
+            $first: '$loginDetails.email',
+          },
+          phoneNumber: {
+            $first: '$phoneNumber',
+          },
+          location: {
+            $first: '$address',
+          },
+          galaxy: {
+            $first: '$galaxy',
+          },
+          personOfReference: {
+            $first: '$personOfReference',
+          },
+          vat: {
+            $first: '$vat',
+          },
+          paymentMode: {
+            $first: '$paymentMode',
+          },
+          hqClient: {
+            $first: '$hqClient',
+          },
+          agentClient: {
+            $first: '$agentClient',
+          },
+          contractFile: {
+            $first: '$contractFile',
+          },
+          productPlanDetails: {
+            $push: '$productPlanDetails',
+          },
+        },
+      });
+      const listPharmacyNetwork = await this.pharmacyNetworkmodel
+        .aggregate(aggregateQuery)
+        .exec();
+      return listPharmacyNetwork;
     } catch (error) {
       if (error) {
         throw error;
@@ -304,15 +420,15 @@ export class PharmacyNetworkService {
   //Active Inactive Pharmacy Network
   async activeInactivePharmacyNetwork(body: any): Promise<any> {
     try {
-      console.log("body is:::::::::::::::",body);
+      console.log('body is:::::::::::::::', body);
       let getPharmacyNetwork = await this.pharmacyNetworkmodel.findOne({
-        _id: body.pharmacyNetworkId
+        _id: body.pharmacyNetworkId,
       });
       if (!getPharmacyNetwork) {
         throw CustomError.NotFound('Pharmacy network not found');
       } else {
         const activeInactive = await this.pharmacyNetworkmodel.findOneAndUpdate(
-          { _id: body.pharmacyNetworkId},
+          { _id: body.pharmacyNetworkId },
           { isActive: getPharmacyNetwork.isActive === true ? false : true },
           { new: true },
         );
@@ -373,4 +489,33 @@ export class PharmacyNetworkService {
       }
     }
   }
+
+  //Delete Pharmacy Network
+  async deletePharmacyNetwork(body: deletePharmacyNetworkDto): Promise<any> {
+    body.pharmacyNetworkId.map(async (pharamacyNId) => {
+      try {
+        await this.pharmacyNetworkmodel.findOneAndUpdate(
+          { _id: pharamacyNId },
+          { isDeleted: true },
+          { new: true },
+        );
+        return {
+          message: 'Deleted pharmacy network successfully.',
+        };
+      } catch (error) {
+        if (error) {
+          throw error;
+        } else {
+          throw CustomError.UnknownError(
+            error?.message || 'Something went wrong, please try again later!',
+          );
+        }
+      }
+    });
+  }
+
+  //Update Product Plan Cart
+  
+
+  
 }
