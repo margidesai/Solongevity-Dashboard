@@ -9,6 +9,7 @@ import 'dotenv/config';
 import { AdminPasswordModule } from './admin-password/admin-password.module';
 import { PharmacyNetworkController } from './pharmacyNetwork/pharmacyNetwork.controller';
 import { PharmacyNetworkModule } from './pharmacyNetwork/pharmacyNetwork.module';
+import { CredentialModule } from './common/credential/credential.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -21,7 +22,8 @@ import { PharmacyNetworkModule } from './pharmacyNetwork/pharmacyNetwork.module'
     AuthModule,
     AdminModule,
     AdminPasswordModule,
-    PharmacyNetworkModule
+    PharmacyNetworkModule,
+    CredentialModule
   ],
   controllers: [AdminController, PharmacyNetworkController],
   providers: [],

@@ -19,6 +19,7 @@ import { pharmacyNetworkDto } from './dto/pharmacyNetwork.dto';
 import { PharmacyNetworkService } from './pharmacyNetwork.service';
 import { diskStorage } from 'multer';
 import { updatePharmacyNetworkDto } from './dto/updatePharmacyNetwork.dto';
+import { CustomError } from 'src/common/helper/exception';
 
 @Controller('pharmacy-network')
 @ApiTags('PharmacyNetwok')
@@ -145,33 +146,29 @@ export class PharmacyNetworkController {
     schema: {
       type: 'object',
       properties: {
-        pharmacyNetwork_Id: {
+        pharmacyNetworkId: {
           type: 'string',
         },
       },
     },
   })
   async activeInactive(@Body() body: any) {
-    const getPharmacyNetwork = await this.pharmacynetworkService.getPharmacyNetworkDetails(
-      body.pharmacyNetwork_Id,
-    );
-    console.log("getPharmacyNetwork::::::::::::::::",getPharmacyNetwork);
-    if (getPharmacyNetwork) {
-      return this.pharmacynetworkService.activeInactivePharmacyNetwork(
-        body.pharmacyNetwork_Id,
-        getPharmacyNetwork,
-      );
+    return this.pharmacynetworkService.activeInactivePharmacyNetwork(body);
+  }
+
+  @Post('updatePharmacyNetwork')
+  async updateSubAdmin(@Body() body: updatePharmacyNetworkDto) {
+    return this.pharmacynetworkService.updatePharmacyNetwork(body);
+  }
+
+  @Get('getPharmacyNetworkDetails/:id')
+  async getPharmacyNetworkDetails(@Param('id') id: string) {
+    const getPharmacyNetwork =
+      await this.pharmacynetworkService.getPharmacyNetworkDetails(id);
+    if (!getPharmacyNetwork) {
+      throw CustomError.NotFound('Pharmacy network not found');
+    } else {
+      return getPharmacyNetwork;
     }
   }
-
-  @Post('updatePharmacyNetwork/:id')
-  async updateSubAdmin(
-    @Param('id') id: string,
-    @Body() body: updatePharmacyNetworkDto,
-  ) {
-    return this.pharmacynetworkService.updatePharmacyNetwork(id, body);
-  }
-
-  
-
 }

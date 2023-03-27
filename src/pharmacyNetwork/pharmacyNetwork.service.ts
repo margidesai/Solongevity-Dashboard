@@ -184,8 +184,8 @@ export class PharmacyNetworkService {
       aggregateQuery.push({
         $group: {
           _id: '$_id',
-          loginId:{
-            $first:"$loginId"
+          loginId: {
+            $first: '$loginId',
           },
           name: {
             $first: '$name',
@@ -199,24 +199,24 @@ export class PharmacyNetworkService {
           galaxy: {
             $first: '$galaxy',
           },
-          productPlan:{
-            $first:'$productPlan'
-          }
+          productPlan: {
+            $first: '$productPlan',
+          },
         },
       });
       aggregateQuery.push({
-        $project:{
-          _id:1,
-          loginId:1,
-          name:1,
-          email:1,
-          location:1,
-          galaxy:1,
-          productPlan:{
-            $size:"$productPlan"
-          }
-        }
-      })
+        $project: {
+          _id: 1,
+          loginId: 1,
+          name: 1,
+          email: 1,
+          location: 1,
+          galaxy: 1,
+          productPlan: {
+            $size: '$productPlan',
+          },
+        },
+      });
 
       if (body.search) {
         const searchText = body.search.trim();
@@ -302,14 +302,22 @@ export class PharmacyNetworkService {
   }
 
   //Active Inactive Pharmacy Network
-  async activeInactivePharmacyNetwork(id: string, body: any): Promise<any> {
+  async activeInactivePharmacyNetwork(body: any): Promise<any> {
     try {
-      const activeInactive = await this.pharmacyNetworkmodel.findOneAndUpdate(
-        { _id: id },
-        { isActive: body.isActive === true ? false : true },
-        { new: true },
-      );
-      return activeInactive;
+      console.log("body is:::::::::::::::",body);
+      let getPharmacyNetwork = await this.pharmacyNetworkmodel.findOne({
+        _id: body.pharmacyNetworkId
+      });
+      if (!getPharmacyNetwork) {
+        throw CustomError.NotFound('Pharmacy network not found');
+      } else {
+        const activeInactive = await this.pharmacyNetworkmodel.findOneAndUpdate(
+          { _id: body.pharmacyNetworkId},
+          { isActive: getPharmacyNetwork.isActive === true ? false : true },
+          { new: true },
+        );
+        return activeInactive;
+      }
     } catch (error) {
       if (error) {
         throw error;
@@ -322,38 +330,40 @@ export class PharmacyNetworkService {
   }
 
   //Update Pharmacy Network
-  async updatePharmacyNetwork(id:string,body:updatePharmacyNetworkDto):Promise<any>{
-    try{
-      const getPharmacyNetwork = await this.pharmacyNetworkmodel.findOne({_id:id})
-      if(!getPharmacyNetwork){
+  async updatePharmacyNetwork(body: updatePharmacyNetworkDto): Promise<any> {
+    try {
+      const getPharmacyNetwork = await this.pharmacyNetworkmodel.findOne({
+        _id: body.pharmacyNetworkId,
+      });
+      if (!getPharmacyNetwork) {
         throw CustomError.NotFound('Pharmacy network not found');
-      }else{
+      } else {
         const updateObj = {
           ...body,
           isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         };
 
-        const updatePharmacyNetwork = await this.pharmacyNetworkmodel.findByIdAndUpdate(
-          { _id: id },
-          updateObj,
-          { new: true },
-        );
+        const updatePharmacyNetwork =
+          await this.pharmacyNetworkmodel.findByIdAndUpdate(
+            { _id: body.pharmacyNetworkId },
+            updateObj,
+            { new: true },
+          );
         const updateData = {
-          name:updatePharmacyNetwork.name,
-          personName:updatePharmacyNetwork.personName,
-          address:updatePharmacyNetwork.address,
-          town:updatePharmacyNetwork.town,
-          postalCode:updatePharmacyNetwork.postalCode,
-          country:updatePharmacyNetwork.country,
-          phoneNumber:updatePharmacyNetwork.phoneNumber,
-          personOfReference:updatePharmacyNetwork.personOfReference,
-          vat:updatePharmacyNetwork.vat
-        }
-        return updateData
+          name: updatePharmacyNetwork.name,
+          personName: updatePharmacyNetwork.personName,
+          address: updatePharmacyNetwork.address,
+          town: updatePharmacyNetwork.town,
+          postalCode: updatePharmacyNetwork.postalCode,
+          country: updatePharmacyNetwork.country,
+          phoneNumber: updatePharmacyNetwork.phoneNumber,
+          personOfReference: updatePharmacyNetwork.personOfReference,
+          vat: updatePharmacyNetwork.vat,
+        };
+        return updateData;
       }
-    }catch (error) {
+    } catch (error) {
       if (error) {
         throw error;
       } else {
@@ -363,5 +373,4 @@ export class PharmacyNetworkService {
       }
     }
   }
-
 }

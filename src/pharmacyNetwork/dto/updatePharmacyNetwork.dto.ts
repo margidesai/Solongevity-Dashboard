@@ -2,7 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString, IsNotEmpty, IsEmail, IsArray, IsBoolean, IsOptional } from 'class-validator';
 import mongoose from 'mongoose';
 export class updatePharmacyNetworkDto {
- _id: mongoose.Schema.Types.ObjectId;
+ //_id: mongoose.Schema.Types.ObjectId;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  pharmacyNetworkId:string;
 
   @ApiProperty()
   @IsNotEmpty()
