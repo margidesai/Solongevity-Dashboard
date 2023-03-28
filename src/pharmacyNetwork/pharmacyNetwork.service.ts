@@ -27,7 +27,6 @@ export class PharmacyNetworkService {
     @InjectModel(Login.name)
     private loginmodel: Model<LoginDocument>,
     private readonly mailer: EmailHelper,
-    
   ) {}
 
   async getProductPlan(authHeaders: string) {
@@ -40,7 +39,6 @@ export class PharmacyNetworkService {
 
   async addPharamacyNetwork(params) {
     try {
-      
       // let data = JSON.parse(params.productPlan);
       // console.log("data is:::::::::::::::::::::::::",data);
       let checkEmail = await this.loginmodel.find({
@@ -150,41 +148,45 @@ export class PharmacyNetworkService {
       const page = body.page ? Number(body.page) : 1;
       const skip = (page - 1) * limit;
       console.log('body is::::::::::::::::', body);
-      let start_date,end_date
-      
+      let start_date, end_date;
+
       if (body.dateRange == 'today') {
-        start_date = new Date(new Date().setUTCHours(0, 0, 0, 0));;
-        end_date = new Date(new Date().setUTCHours(11, 59, 59, 999)); 
+        start_date = new Date(new Date().setUTCHours(0, 0, 0, 0));
+        end_date = new Date(new Date().setUTCHours(11, 59, 59, 999));
       }
-      if(body.dateRange == "thisWeek"){
-        start_date =new Date(new Date().setUTCHours(0, 0, 0, 0));
-        let day = new Date(new Date().setUTCHours(0, 0, 0, 0))
+      if (body.dateRange == 'thisWeek') {
+        start_date = new Date(new Date().setUTCHours(0, 0, 0, 0));
+        let day = new Date(new Date().setUTCHours(0, 0, 0, 0));
         day.setDate(day.getDate() + 7);
         end_date = day;
       }
-      if(body.dateRange == "lastWeek"){
-        let day = new Date(new Date().setUTCHours(0, 0, 0, 0))
+      if (body.dateRange == 'lastWeek') {
+        let day = new Date(new Date().setUTCHours(0, 0, 0, 0));
         day.setDate(day.getDate() - 7);
         start_date = day;
-        end_date =new Date(new Date().setUTCHours(0, 0, 0, 0));
+        end_date = new Date(new Date().setUTCHours(0, 0, 0, 0));
       }
-      if(body.dateRange == "custom"){
-        start_date = new Date(body.startDate)
-        let day = new Date(body.endDate)
+      if (body.dateRange == 'custom') {
+        start_date = new Date(body.startDate);
+        let day = new Date(body.endDate);
         day.setDate(day.getDate() + 1);
         end_date = day;
-        console.log("start date and end date is:::::::::::::::",start_date,end_date);
+        console.log(
+          'start date and end date is:::::::::::::::',
+          start_date,
+          end_date,
+        );
       }
       const aggregateQuery = [];
 
       aggregateQuery.push({
-        $match:{
-          createdAt:{
+        $match: {
+          createdAt: {
             $gte: start_date,
-            $lt: end_date
-          }
-        }
-      })
+            $lt: end_date,
+          },
+        },
+      });
 
       aggregateQuery.push({
         $lookup: {
@@ -514,8 +516,34 @@ export class PharmacyNetworkService {
     });
   }
 
-  //Update Product Plan Cart
-  
-
-  
+  //Update Management Info
+  async updateManagementInfo(body): Promise<any> {
+    try {
+      let getPhramacyNetworkId = await this.pharmacyNetworkmodel.findOne({
+        _id: body.pharmacyNetworkId,
+      });
+      if (!getPhramacyNetworkId) {
+        throw CustomError.NotFound('Pharmacy network not found');
+      } else {
+        let updatedManagementInfo =
+          await this.pharmacyNetworkmodel.findOneAndUpdate(
+            { _id: body.pharmacyNetworkId },
+            {
+              hqClient: body.hqClient,
+              agentClient: body.agentClient,
+            },
+            { new: true },
+          );
+        return { _id: updatedManagementInfo._id,hqClient:updatedManagementInfo.hqClient,agentClient:updatedManagementInfo.agentClient };
+      }
+    } catch (error) {
+      if (error) {
+        throw error;
+      } else {
+        throw CustomError.UnknownError(
+          error?.message || 'Something went wrong, please try again later!',
+        );
+      }
+    }
+  }
 }

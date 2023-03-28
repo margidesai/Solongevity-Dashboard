@@ -189,20 +189,35 @@ export class PharmacyNetworkController {
   }
 
   @Post('deletePharmacyNetwork')
-  // @ApiBody({
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       pharmacyNetworkId: {
-  //         type: 'string',
-  //       },
-  //     },
-  //   },
-  // })
+  
   async deletePharmacyNetwork(@Body() body: deletePharmacyNetworkDto) {
     console.log("body is::::::::::::::",body);
     const getPharmacyNetwork =
       await this.pharmacynetworkService.deletePharmacyNetwork(body);
+    return getPharmacyNetwork
+  }
+
+
+  @Post('updateManagementInfo')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        pharmacyNetworkId: {
+          type: 'string',
+        },
+        hqClient: {
+          type: 'string',
+        },
+        agentClient:{
+          type: 'string',
+        }
+      },
+    },
+  })
+  async updateManagementInfo(@Body() body: any) {
+    const getPharmacyNetwork =
+      await this.pharmacynetworkService.updateManagementInfo(body);
     return getPharmacyNetwork
   }
 }
