@@ -17,6 +17,7 @@ import { customProductPlanDto } from './dto/customProductPlanDto.dto';
 import { updatePharmacyNetworkDto } from './dto/updatePharmacyNetwork.dto';
 import { deletePharmacyNetworkDto } from './dto/deletePharmacyNetwork.dto';
 
+
 @Injectable()
 export class PharmacyNetworkService {
   constructor(
@@ -29,7 +30,7 @@ export class PharmacyNetworkService {
     private readonly mailer: EmailHelper,
   ) {}
 
-  async getProductPlan(authHeaders: string) {
+  async getProductPlan() {
     const getProductPlan = await this.productPlanmodel.find({
       isActive: true,
       isCustomPlan: false,
@@ -177,16 +178,27 @@ export class PharmacyNetworkService {
           end_date,
         );
       }
+      console.log(
+        'start date and end date is:::::::::::::::',
+        start_date,
+        end_date,
+      );
       const aggregateQuery = [];
-
-      aggregateQuery.push({
-        $match: {
-          createdAt: {
-            $gte: start_date,
-            $lt: end_date,
+      if (
+        body.dateRange == 'today' ||
+        body.dateRange == 'thisWeek' ||
+        body.dateRange == 'lastWeek' ||
+        body.dateRange == 'custom'
+      ) {
+        aggregateQuery.push({
+          $match: {
+            createdAt: {
+              $gte: start_date,
+              $lt: end_date,
+            },
           },
-        },
-      });
+        });
+      }
 
       aggregateQuery.push({
         $lookup: {
@@ -407,7 +419,7 @@ export class PharmacyNetworkService {
       const listPharmacyNetwork = await this.pharmacyNetworkmodel
         .aggregate(aggregateQuery)
         .exec();
-      return listPharmacyNetwork;
+      return listPharmacyNetwork[0];
     } catch (error) {
       if (error) {
         throw error;
@@ -534,7 +546,11 @@ export class PharmacyNetworkService {
             },
             { new: true },
           );
-        return { _id: updatedManagementInfo._id,hqClient:updatedManagementInfo.hqClient,agentClient:updatedManagementInfo.agentClient };
+        return {
+          _id: updatedManagementInfo._id,
+          hqClient: updatedManagementInfo.hqClient,
+          agentClient: updatedManagementInfo.agentClient,
+        };
       }
     } catch (error) {
       if (error) {
@@ -546,4 +562,6 @@ export class PharmacyNetworkService {
       }
     }
   }
+
+ 
 }

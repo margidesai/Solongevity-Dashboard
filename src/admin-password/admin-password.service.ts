@@ -24,6 +24,7 @@ export class AdminPasswordService {
     const admin = await this.loginModel.findOne({
       email: AdminForgotPasswordDto.email,
     });
+    console.log("admin is:::::::::::::::",admin);
     if (!admin) {
       Logger.error('User does not exists.' + admin);
       throw AuthExceptions.AccountNotexist();

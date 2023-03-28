@@ -62,8 +62,9 @@ export class AdminService {
   }
 
   async getAdminDetails(authHeaders: string) {
-    console.log("get admin is:::::::::::::::::::::::",authHeaders);
-    const admin = await this.loginModel.find({});
+    
+    const admin = await this.loginModel.find({userType:"superadmin"});
+    console.log("admin:::::::::::::::::::::::",admin);
     if (!admin) {
       throw AuthExceptions.AccountNotexist();
     } else {

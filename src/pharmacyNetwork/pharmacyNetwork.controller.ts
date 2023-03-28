@@ -13,7 +13,7 @@ import {
   FileInterceptor,
   FilesInterceptor,
 } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { customProductPlanDto } from './dto/customProductPlanDto.dto';
 import { pharmacyNetworkDto } from './dto/pharmacyNetwork.dto';
 import { PharmacyNetworkService } from './pharmacyNetwork.service';
@@ -22,8 +22,10 @@ import { updatePharmacyNetworkDto } from './dto/updatePharmacyNetwork.dto';
 import { CustomError } from 'src/common/helper/exception';
 import { deletePharmacyNetworkDto } from './dto/deletePharmacyNetwork.dto';
 
+
 @Controller('pharmacy-network')
 @ApiTags('PharmacyNetwok')
+@ApiBearerAuth()
 export class PharmacyNetworkController {
   constructor(private pharmacynetworkService: PharmacyNetworkService) {}
 
@@ -107,9 +109,7 @@ export class PharmacyNetworkController {
 
   @Get('getProductPlanDetails')
   async getProductPlanDetails(@Request() req: Request) {
-    const getProductPlan = await this.pharmacynetworkService.getProductPlan(
-      req.headers['authorization'],
-    );
+    const getProductPlan = await this.pharmacynetworkService.getProductPlan();
     return getProductPlan;
   }
 
@@ -220,4 +220,5 @@ export class PharmacyNetworkController {
       await this.pharmacynetworkService.updateManagementInfo(body);
     return getPharmacyNetwork
   }
+
 }

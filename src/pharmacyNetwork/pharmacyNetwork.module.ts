@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MulterModule } from '@nestjs/platform-express';
 import { Login, LoginSchema } from 'schemas/login.schema';
 import { EmailHelper } from 'src/common/email.helper';
 import { FileUploadController } from 'src/common/file-upload/file-upload.controller';
+import { SuperAdminAuthMiddleware } from 'src/middleware/auth.middleware';
 import { PharmacyNetworkController } from './pharmacyNetwork.controller';
 import { PharmacyNetworkService } from './pharmacyNetwork.service';
 import { PharmacyNetwork, PharmacyNetworkSchema } from './schemas/pharmacyNetwork.schema';
@@ -24,4 +25,11 @@ import { ProductPlan, ProductPlanSchema } from './schemas/productPlan.schema';
   controllers: [PharmacyNetworkController],
   exports: [PharmacyNetworkService],
 })
-export class PharmacyNetworkModule {}
+export class PharmacyNetworkModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+
+    consumer
+      .apply(SuperAdminAuthMiddleware)
+      .forRoutes(PharmacyNetworkController);
+  } 
+}

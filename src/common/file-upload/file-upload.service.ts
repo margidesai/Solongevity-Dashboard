@@ -8,6 +8,11 @@ export class FileUploadService {
             
           try{
             console.log("body is::::::::::::::::",body);
+            let res = {
+              path:body.destination,
+              fileName:body.filename
+            }
+            return res
           }catch (error) {
             if (error?.response?.error) {
               throw error;
